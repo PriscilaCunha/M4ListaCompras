@@ -1,118 +1,86 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
 
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+import Home from './src/Home';
+import Loading from './src/Loading';
+import Authentication from './src/Authentication';
+import AddProduct from './src/AddProduct';
+import EditProduct from './src/EditProduct';
+import DetailProduct from './src/DetailProduct';
 
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+LogBox.ignoreLogs(['Setting a timer', 'Possible', 'AsyncStorage', 'Cannot']);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+function App() {
+
+  const [userUid, setUserUid] = useState();
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyARjOyJeG7ECm9MtjkGHGPEi3WI2DZDBHo",
+    authDomain: "igti-teste.firebaseapp.com",
+    databaseURL: "https://igti-teste-default-rtdb.firebaseio.com",
+    projectId: "igti-teste",
+    storageBucket: "igti-teste.appspot.com",
+    messagingSenderId: "459966793365",
+    appId: "1:459966793365:web:db1fd805690bb23c79fd9c"
   };
 
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  
+  useEffect(async () => {
+    setUserUid(await AsyncStorage.getItem('userUid') || '')
+  }, []);
+  
+  const Stack = createNativeStackNavigator();
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="loading" component={loading}
+          options={{
+            headerShown: false
+          }}
+          initialParams={{ 'userUid': userUid }}
+        />
+
+        <Stack.Screen name="authentication" component={Authentication} options={{
+          headerShown: false,
+          headerBackVisible: false
+        }} />
+
+        <Stack.Screen name="home" component={Home} 
+          options={{
+            title: 'Inicio',
+            headerBackVisible: false
+          }}
+          initialParams={{ 'userUid': userUid }}
+        />
+
+        <Stack.Screen name="addProduct" component={AddProduct} options={{
+          title: 'Adicionar produto'
+        }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  button: {
+      alignItems: "center",
+      backgroundColor: '#DDDDDD',
+      padding: 10
+  }
 });
 
 export default App;
